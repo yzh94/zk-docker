@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    replicas: '1'
+  name: zookeeper
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      name: zookeeper
+  template:
+    metadata:
+      labels:
+        name: zookeeper
+    spec:
+      containers:
+      - env:
+        - name: cpu
+          value: '500'
+        - name: mem
+          value: '5072'
+        - name: group
+          value: zookeeper
+        - name: ip_range
+          value: 172.16.100
+        - name: SERVERS
+          value: 172.16.100.244,172.16.100.246,172.16.100.248
+        image: 172.16.100.249:5000/zookeeper:35
+        imagePullPolicy: IfNotPresent
+        name: zookeeper
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /data/zookeeper/data
+          name: zookeeper-data
+        - mountPath: /data/zookeeper/logs
+          name: zookeeper-log
+        - mountPath: /data/java
+          name: local-java
+      dnsPolicy: ClusterFirst
+      hostNetwork: true
+      nodeSelector:
+        zk: zk
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 2
+      volumes:
+      - name: zookeeper-data
+        hostPath:
+          type: ''
+          path: /data/zookeeper/data
+      - name: zookeeper-log
+        hostPath:
+          type: ''
+          path: /data/zookeeper/logs
+      - name: local-java
+        hostPath:
+          type: ''
+          path: /data/java
+  updateStrategy: 
+     type: OnDelete
